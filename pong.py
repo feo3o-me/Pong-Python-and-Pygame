@@ -1,4 +1,5 @@
 import pygame
+import random
 
 def main():
     pygame.init()
@@ -21,10 +22,13 @@ def main():
     player1 = pygame.Rect(10, (HEIGHT / 2 - 70), 10, 140)
     player2 = pygame.Rect((WIDTH - 20), (HEIGHT / 2 - 70), 10, 140)
 
-    ball_speed_x = 5
-    ball_speed_y = 5
+    ball_speed_x = 5  * random.choice((-1, 1))
+    ball_speed_y = 5  * random.choice((-1, 1))
     player1_speed = 0
     player2_speed = 0
+
+    goal1 = pygame.Rect(0, 0, 1, HEIGHT)
+    goal2 = pygame.Rect(WIDTH, 0, 1, HEIGHT)
     
     # ========= #
     # Main Loop
@@ -37,23 +41,32 @@ def main():
 
     while run:
         # Check For Events
+
+        # Quit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                run = False
+            # Key Handler  
+            
             if event.type == pygame.KEYDOWN:
+                # Player 1
                 if event.key == pygame.K_w:
                     player1_speed -= 5
                 if event.key == pygame.K_s:
                     player1_speed += 5
+                # Player 2
                 if event.key == pygame.K_UP:
                     player2_speed -= 5
                 if event.key == pygame.K_DOWN:
                     player2_speed += 5
             if event.type == pygame.KEYUP:
+                # Player 1
                 if event.key == pygame.K_w:
                     player1_speed += 5
                 if event.key == pygame.K_s:
                     player1_speed -= 5
+                # Player 2
                 if event.key == pygame.K_UP:
                     player2_speed += 5
                 if event.key == pygame.K_DOWN:
@@ -68,21 +81,34 @@ def main():
         player2.y += player2_speed
 
         # Add collision
+
+        # If ball hit the screen limit
         if ball.bottom >= HEIGHT or ball.top <= 0:
             ball_speed_y *= -1
+
+        # If ball hit the goal    
+        if ball.colliderect(goal1) or ball.colliderect(goal2):
+            ball.center = (WIDTH / 2, HEIGHT / 2)
+            ball_speed_x = 5  * random.choice((-1, 1))
+            ball_speed_y = 5  * random.choice((-1, 1))
+
+        # If ball hit the player   
         if ball.colliderect(player1) or ball.colliderect(player2):
             ball_speed_x *= -1
 
+        # If player reaches max screen y
         if player1.top <= 0:
             player1.top = 0
         if player1.bottom >= HEIGHT:
             player1.bottom = HEIGHT
 
+        # If player reaches max screen y
         if player2.top <= 0:
             player2.top = 0
         if player2.bottom >= HEIGHT:
             player2.bottom = HEIGHT
 
+        # Draw and update
         window.fill(BACKGROUD_COLOR)
         pygame.draw.aaline(window, LINE_COLOR, (WIDTH / 2, 0), (WIDTH / 2, HEIGHT))
         pygame.draw.rect(window, RECT_COLOR, player1)
